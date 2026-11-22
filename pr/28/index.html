@@ -26,9 +26,22 @@
         status.textContent = "WebGPU is unavailable in this browser. This demo requires WebGPU and has no WebGL2 fallback.";
       } else {
         status.textContent = "WebGPU available. Starting demo…";
-        window.addEventListener("TrunkApplicationStarted", () => {
-          status.textContent = "WebGPU demo running. Drag to orbit; use the wheel to zoom.";
-        });
+        if (document.querySelector('link[data-trunk][rel="rust"]')) {
+          import("./wasm_3d_overlay.js")
+            .then(({ default: init }) => init())
+            .then(() => {
+              status.textContent = "WebGPU demo running. Drag to orbit; use the wheel to zoom.";
+            })
+            .catch((error) => {
+              console.error(error);
+              status.classList.add("error");
+              status.textContent = `Failed to start the WebGPU demo: ${error}`;
+            });
+        } else {
+          window.addEventListener("TrunkApplicationStarted", () => {
+            status.textContent = "WebGPU demo running. Drag to orbit; use the wheel to zoom.";
+          }, { once: true });
+        }
       }
     </script>
   </body>
